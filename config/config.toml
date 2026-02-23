@@ -21,7 +21,7 @@
 #   ollama pull qwen2.5:14b
 [llm]
 model       = "qwen2.5:14b"
-base_url    = "http://host.docker.internal:11434/v1"
+base_url    = "http://ollama:11434/v1"
 api_key     = "ollama"
 max_tokens  = 4096
 temperature = 0.0
@@ -91,7 +91,7 @@ temperature = 0.0
 # Pull with: ollama pull llama3.2-vision
 # [llm.vision]
 # model       = "llama3.2-vision"
-# base_url    = "http://host.docker.internal:11434/v1"
+# base_url    = "http://ollama:11434/v1"
 # api_key     = "ollama"
 # max_tokens  = 4096
 # temperature = 0.0

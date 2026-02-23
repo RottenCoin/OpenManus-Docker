@@ -10,14 +10,14 @@
 
 [llm]
 model       = "qwen2.5:14b"
-base_url    = "http://host.docker.internal:11434/v1"
+base_url    = "http://ollama:11434/v1"
 api_key     = "ollama"
 max_tokens  = 4096
 temperature = 0.0
 
 [llm.manus]
 model       = "qwen2.5:14b"
-base_url    = "http://host.docker.internal:11434/v1"
+base_url    = "http://ollama:11434/v1"
 api_key     = "ollama"
 max_tokens  = 4096
 temperature = 0.0
@@ -26,7 +26,7 @@ temperature = 0.0
 # Swap for llava:13b if you prefer.
 [llm.vision]
 model       = "llama3.2-vision"
-base_url    = "http://host.docker.internal:11434/v1"
+base_url    = "http://ollama:11434/v1"
 api_key     = "ollama"
 max_tokens  = 4096
 temperature = 0.0
