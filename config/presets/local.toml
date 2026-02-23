@@ -2,21 +2,21 @@
 #  PRESET: ALL LOCAL (Ollama only – completely FREE)
 #
 #  Pull models first:
-#    ollama pull qwen2.5:14b
+#    ollama pull qwen2.5:3b
 #    ollama pull llama3.2-vision    # for vision tasks
 #
 #  Use with:  make run-local
 # =============================================================
 
 [llm]
-model       = "qwen2.5:14b"
+model       = "qwen2.5:3b"
 base_url    = "http://ollama:11434/v1"
 api_key     = "ollama"
 max_tokens  = 4096
 temperature = 0.0
 
 [llm.manus]
-model       = "qwen2.5:14b"
+model       = "qwen2.5:3b"
 base_url    = "http://ollama:11434/v1"
 api_key     = "ollama"
 max_tokens  = 4096
@@ -38,6 +38,12 @@ retry_delay     = 60
 max_retries     = 3
 lang            = "en"
 country         = "us"
+
+[browser]
+headless = true
+
+[daytona]
+daytona_api_key = "not-used"
 
 [mcp]
 server_reference = "app.mcp.server"

@@ -1,37 +1,143 @@
 # OpenManus-Docker
 
-just a simple [Docker](https://www.docker.com/) image for [OpenManus](https://github.com/mannaandpoem/OpenManus)
+A Docker wrapper for [OpenManus](https://github.com/FoundationAgents/OpenManus) — the open-source AI agent framework. Runs the full stack (agent + browser automation + LLM backend) in containers with no host-side Python setup required.
 
-If you want to play with OpenManus in a safe environment, you may run it in a Docker container using the Dockerfile from this repository.
+## Prerequisites
 
-## Instructions ##
+- [Docker](https://docs.docker.com/get-docker/) with Compose (v2)
+- `make`
+- An Anthropic API key — _only_ if using the Claude-backed presets
 
-In order to build and run Docker images you must have Docker installed - for most people, installing the [Docker Desktop](https://www.docker.com/products/docker-desktop/) will be the best way to do so.
+---
 
-Once done, download this repository and unpack it into a folder of your choice (e.g., `OpenManus`).
+## Quick start
 
-Now, open file `./config/config.toml` with your favourite editor and enter your configuration details. If you plan to use [Ollama](https://ollama.com/) with a locally installed LLM (e.g., `qwen2.5-coder:14b`), the first lines of your configuration may look as follows:
+### Option A — Fully local (free, no API key)
 
-```
-# Global LLM configuration
-[llm]
-model = "qwen2.5-coder:14b"
-base_url = "http://host.docker.internal:11434/v1"
-api_key = "ollama"
-max_tokens = 4096
-temperature = 0.0
-```
+Uses [Ollama](https://ollama.com/) running inside Docker. No cloud services needed.
 
-Save your changes, then open your terminal, navigate to your OpenManus folder and run the following command:
+**1. Clone this repo**
 
-```
-docker compose up
+```bash
+git clone https://github.com/rozek/OpenManus-Docker
+cd OpenManus-Docker
 ```
 
-Docker will now download all required files (which may take a while, when run for the first time) and finally start the freshly built image.
+**2. Build the image** _(first time only, ~10 min)_
 
-Since OpenManus requires some input from the command line, you should now switch to the "Docker Desktop", select the OpenManus container (named "openmanus-1") and navigate to the "TTY". Here, you may now enter your prompt and watch OpenManus working.
+```bash
+make build
+```
 
-## License ##
+**3. Pull the Ollama models** _(one-time, ~16 GB total)_
 
-[MIT License](LICENSE.md)
+```bash
+docker compose up -d ollama
+docker compose exec ollama ollama pull qwen2.5:14b      # main agent (~9 GB)
+docker compose exec ollama ollama pull llama3.2-vision  # vision tasks (~7 GB)
+```
+
+**4. Run**
+
+```bash
+make run-local
+```
+
+---
+
+### Option B — Claude Haiku + local fallback _(default)_
+
+Fast and cheap. Manus agent uses Claude Haiku; Ollama handles the fallback tier; vision uses Claude Sonnet.
+
+**1.** Complete steps 1–3 from Option A.
+
+**2.** Edit `config/config.toml` and replace both `sk-ant-YOUR_ANTHROPIC_KEY` placeholders with your real key.
+
+**3. Run**
+
+```bash
+make run
+```
+
+---
+
+### Option C — Claude Opus _(most capable)_
+
+For complex reasoning and research tasks. Opus as the main agent, Sonnet for vision.
+
+**1.** Edit `config/presets/opus.toml` and replace all `sk-ant-YOUR_ANTHROPIC_KEY` placeholders.
+
+**2. Run**
+
+```bash
+make run-opus
+```
+
+---
+
+## All make targets
+
+| Command | What it does |
+|---|---|
+| `make build` | Build the Docker image |
+| `make rebuild` | Force-rebuild from scratch (no cache) |
+| `make run` | Haiku (main) + Ollama fallback + Sonnet vision |
+| `make run-local` | All Ollama — completely free |
+| `make run-opus` | Claude Opus (main) + Sonnet vision |
+| `make shell` | Open a bash shell inside the running container |
+| `make logs` | Tail container logs |
+| `make clean` | Remove containers and image |
+
+---
+
+## Configuration
+
+All config lives in `config/`. The mounted file structure:
+
+```
+config/
+├── config.toml          # Default config (used by make run)
+└── presets/
+    ├── local.toml       # All Ollama (used by make run-local)
+    └── opus.toml        # Claude Opus (used by make run-opus)
+```
+
+### Model tiers (default `config.toml`)
+
+| Section | Model | Purpose |
+|---|---|---|
+| `[llm]` | `qwen2.5:14b` via Ollama | Free fallback for any unnamed agent |
+| `[llm.manus]` | Claude Haiku | Main Manus agent |
+| `[llm.vision]` | Claude Sonnet | All vision / multimodal tasks |
+
+Each agent picks up the config section matching its lowercase name. Any agent without a named section falls back to `[llm]`.
+
+### Alternative models
+
+`config.toml` includes commented-out blocks for:
+
+- OpenAI GPT-4o / GPT-4o-mini
+- Groq Llama 3.3 70B (free cloud tier)
+- Claude Opus 4
+- Local Llama 3.2 Vision via Ollama
+
+Copy any block into `[llm.manus]` to swap the main agent.
+
+---
+
+## Hardware notes
+
+- Ollama runs on CPU if no GPU is present. On a Ryzen 5700G (64 GB RAM): `qwen2.5:14b` runs at ~4–8 tok/s.
+- GPU acceleration (NVIDIA/AMD) requires additional Docker configuration not covered here.
+
+---
+
+## Interacting with OpenManus
+
+Once running, the container is interactive. If using Docker Desktop, select the `openmanus-1` container and open the **Exec** tab. From the terminal, type your task prompt and press Enter.
+
+---
+
+## Licence
+
+[MIT](LICENSE.md)
