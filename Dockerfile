@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y git
 
 WORKDIR /app
 
-RUN git clone https://github.com/mannaandpoem/OpenManus.git
+RUN git clone https://github.com/FoundationAgents/OpenManus.git
 WORKDIR /app/OpenManus
 
 RUN pip install --no-cache-dir -r requirements.txt

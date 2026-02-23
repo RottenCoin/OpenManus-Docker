@@ -1,0 +1,6 @@
+services:
+  openmanus:
+    volumes:
+      - ./config:/app/OpenManus/config
+      # Override config.toml with Claude Opus preset
+      - ./config/presets/opus.toml:/app/OpenManus/config/config.toml:ro

@@ -1,0 +1,46 @@
+# =============================================================
+#  PRESET: ALL LOCAL (Ollama only – completely FREE)
+#
+#  Pull models first:
+#    ollama pull qwen2.5:14b
+#    ollama pull llama3.2-vision    # for vision tasks
+#
+#  Use with:  make run-local
+# =============================================================
+
+[llm]
+model       = "qwen2.5:14b"
+base_url    = "http://host.docker.internal:11434/v1"
+api_key     = "ollama"
+max_tokens  = 4096
+temperature = 0.0
+
+[llm.manus]
+model       = "qwen2.5:14b"
+base_url    = "http://host.docker.internal:11434/v1"
+api_key     = "ollama"
+max_tokens  = 4096
+temperature = 0.0
+
+# Local multimodal model for vision tasks.
+# Swap for llava:13b if you prefer.
+[llm.vision]
+model       = "llama3.2-vision"
+base_url    = "http://host.docker.internal:11434/v1"
+api_key     = "ollama"
+max_tokens  = 4096
+temperature = 0.0
+
+[search]
+engine          = "DuckDuckGo"
+fallback_engines = ["Bing"]
+retry_delay     = 60
+max_retries     = 3
+lang            = "en"
+country         = "us"
+
+[mcp]
+server_reference = "app.mcp.server"
+
+[runflow]
+use_data_analysis_agent = false

@@ -135,3 +135,6 @@ out
 .pnp.*
 
 .DS_Store
+
+# Local config contains API keys — never commit
+config/config.toml

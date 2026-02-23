@@ -1,0 +1,6 @@
+services:
+  openmanus:
+    volumes:
+      - ./config:/app/OpenManus/config
+      # Override config.toml with all-local Ollama preset
+      - ./config/presets/local.toml:/app/OpenManus/config/config.toml:ro

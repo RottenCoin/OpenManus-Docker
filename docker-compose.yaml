@@ -3,5 +3,9 @@ services:
     build: .
     volumes:
       - ./config:/app/OpenManus/config
+    extra_hosts:
+      # Required on Linux for the container to reach Ollama on the host.
+      # On macOS/Windows Docker Desktop this is automatic; on Linux it is not.
+      - "host.docker.internal:host-gateway"
     stdin_open: true
     tty: true

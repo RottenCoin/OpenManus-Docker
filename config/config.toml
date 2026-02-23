@@ -1,49 +1,141 @@
-# Global LLM configuration
+# =============================================================
+#  OpenManus – Tiered Model Configuration
+#
+#  How per-agent routing works:
+#    Each agent's name (lowercased) maps to a named [llm.<name>]
+#    section.  If no named section exists, [llm] is the fallback.
+#
+#    Manus agent  → [llm.manus]   (falls back to [llm])
+#    Vision tasks → [llm.vision]  (always explicit)
+#
+#  Quick mode switch:
+#    make run           # default (Haiku + local fallback)
+#    make run-local     # all Ollama  (free)
+#    make run-opus      # Claude Opus (most capable)
+# =============================================================
+
+
+# ── TIER 1 · FREE · Local Ollama ─────────────────────────────
+# Default fallback for any agent without its own named section.
+# Ollama must be running on the host with the model pulled:
+#   ollama pull qwen2.5:14b
 [llm]
-model = "qwen2.5-coder:14b"
-base_url = "http://host.docker.internal:11434/v1"
-api_key = "ollama"
-max_tokens = 4096
+model       = "qwen2.5:14b"
+base_url    = "http://host.docker.internal:11434/v1"
+api_key     = "ollama"
+max_tokens  = 4096
 temperature = 0.0
 
-# [llm] #AZURE OPENAI:
-# api_type= 'azure'
-# model = "YOUR_MODEL_NAME" #"gpt-4o-mini"
-# base_url = "{YOUR_AZURE_ENDPOINT.rstrip('/')}/openai/deployments/{AZURE_DEPOLYMENT_ID}"
-# api_key = "AZURE API KEY"
-# max_tokens = 8096
-# temperature = 0.0
-# api_version="AZURE API VERSION" #"2024-08-01-preview"
 
-# Optional configuration for specific LLM models
+# ── TIER 2 · CHEAP · Claude Haiku ────────────────────────────
+# Main Manus agent.  Fast and capable for most agentic work.
+# Manus.name = "Manus" → config_name = "manus" → [llm.manus]
+[llm.manus]
+model       = "claude-haiku-4-5-20251001"
+base_url    = "https://api.anthropic.com/v1/"
+api_key     = "sk-ant-YOUR_ANTHROPIC_KEY"
+max_tokens  = 8192
+temperature = 0.0
+
+
+# ── TIER 3 · MID · Claude Sonnet (Vision) ────────────────────
+# Used for all vision / multimodal steps regardless of agent.
 [llm.vision]
-model = "claude-3-5-sonnet"
-base_url = "https://api.openai.com/v1"
-api_key = "sk-..."
+model       = "claude-sonnet-4-6"
+base_url    = "https://api.anthropic.com/v1/"
+api_key     = "sk-ant-YOUR_ANTHROPIC_KEY"
+max_tokens  = 8192
+temperature = 0.0
 
-# Optional configuration for specific browser configuration
+
+# =============================================================
+#  ALTERNATIVE MODEL OPTIONS
+#  Copy any block below into [llm.manus] to swap the main agent.
+# =============================================================
+
+# ── OpenAI GPT-4o-mini (cheap) ────────────────────────────────
+# [llm.manus]
+# model       = "gpt-4o-mini"
+# base_url    = "https://api.openai.com/v1"
+# api_key     = "sk-YOUR_OPENAI_KEY"
+# max_tokens  = 8192
+# temperature = 0.0
+
+# ── OpenAI GPT-4o (mid) ───────────────────────────────────────
+# [llm.manus]
+# model       = "gpt-4o"
+# base_url    = "https://api.openai.com/v1"
+# api_key     = "sk-YOUR_OPENAI_KEY"
+# max_tokens  = 8192
+# temperature = 0.0
+
+# ── Groq – Llama 3.3 70B (FREE cloud, very fast) ─────────────
+# Sign up at console.groq.com – generous free tier.
+# [llm.manus]
+# model       = "llama-3.3-70b-versatile"
+# base_url    = "https://api.groq.com/openai/v1"
+# api_key     = "gsk_YOUR_GROQ_KEY"
+# max_tokens  = 4096
+# temperature = 0.0
+
+# ── Claude Opus 4 (advanced, most capable) ────────────────────
+# Use make run-opus, or paste here for permanent upgrade.
+# [llm.manus]
+# model       = "claude-opus-4-6"
+# base_url    = "https://api.anthropic.com/v1/"
+# api_key     = "sk-ant-YOUR_ANTHROPIC_KEY"
+# max_tokens  = 32000
+# temperature = 0.0
+
+# ── Ollama – Llama 3.2 Vision (local multimodal) ─────────────
+# Pull with: ollama pull llama3.2-vision
+# [llm.vision]
+# model       = "llama3.2-vision"
+# base_url    = "http://host.docker.internal:11434/v1"
+# api_key     = "ollama"
+# max_tokens  = 4096
+# temperature = 0.0
+
+
+# =============================================================
+#  BROWSER
+# =============================================================
 # [browser]
-# Whether to run browser in headless mode (default: false)
-#headless = false
-# Disable browser security features (default: true)
-#disable_security = true
-# Extra arguments to pass to the browser
-#extra_chromium_args = []
-# Path to a Chrome instance to use to connect to your normal browser
-# e.g. '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-#chrome_instance_path = ""
-# Connect to a browser instance via WebSocket
-#wss_url = ""
-# Connect to a browser instance via CDP
-#cdp_url = ""
+# headless         = false
+# disable_security = true
+# extra_chromium_args = []
 
-# Optional configuration, Proxy settings for the browser
-# [browser.proxy]
-# server = "http://proxy-server:port"
-# username = "proxy-username"
-# password = "proxy-password"
 
-# Optional configuration, Search settings.
-# [search]
-# Search engine for agent to use. Default is "Google", can be set to "Baidu" or "DuckDuckGo".
-#engine = "Google"
+# =============================================================
+#  SEARCH
+# =============================================================
+[search]
+engine          = "DuckDuckGo"
+fallback_engines = ["Bing", "Google"]
+retry_delay     = 60
+max_retries     = 3
+lang            = "en"
+country         = "us"
+
+
+# =============================================================
+#  SANDBOX (optional isolated code execution)
+# =============================================================
+# [sandbox]
+# use_sandbox    = false
+# image          = "python:3.12-slim"
+# work_dir       = "/workspace"
+# memory_limit   = "2g"
+# cpu_limit      = 2.0
+# timeout        = 300
+# network_enabled = true
+
+
+# =============================================================
+#  MCP / RUNFLOW
+# =============================================================
+[mcp]
+server_reference = "app.mcp.server"
+
+[runflow]
+use_data_analysis_agent = false
